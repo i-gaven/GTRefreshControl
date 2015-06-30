@@ -20,6 +20,9 @@ typedef NS_ENUM(NSInteger, GTPullRefreshState) {
 @interface GTRefreshTableView ()<UITableViewDelegate, UITableViewDataSource>
 
 @property (nonatomic, assign) GTPullRefreshState pullRefreshState;
+@property (nonatomic, strong) GTRefreshHeader *headerView;
+
+@property (nonatomic, strong) GTRefreshHeader *footView;
 
 @end
 
@@ -34,30 +37,35 @@ typedef NS_ENUM(NSInteger, GTPullRefreshState) {
     self.dataSource = self;
     
     // 添加头视图
-    GTRefreshHeader *headerView = [[GTRefreshHeader alloc]initWithFrame:CGRectMake(0, 0 - self.bounds.size.height, self.frame.size.width, self.frame.size.height)];
+    self.headerView = [[GTRefreshHeader alloc]initWithFrame:CGRectZero];
+    [self addSubview:_headerView];
     
-    [self addSubview:headerView];
+    self.footView = [[GTRefreshHeader alloc]initWithFrame:CGRectZero];
+    self.tableFooterView = _footView;
+}
+
+- (void)layoutSubviews {
+    [super layoutSubviews];
+    
+    self.headerView.frame = CGRectMake(0, 0 - self.bounds.size.height, self.frame.size.width, self.frame.size.height);
+    
+    self.footView.frame = CGRectMake(0, self.bounds.size.height, self.frame.size.width, self.frame.size.height);
 }
 
 #pragma mark - 表视图代理方法
 - (NSInteger)tableView:(UITableView *)tableView numberOfRowsInSection:(NSInteger)section {
     
-    return 10;
+    return 40;
 }
 
 - (UITableViewCell *)tableView:(UITableView *)tableView cellForRowAtIndexPath:(NSIndexPath *)indexPath {
     
     static NSString *cellID = @"refreshCell";
-    
     UITableViewCell *cell = [tableView dequeueReusableCellWithIdentifier:cellID];
-    
     if (cell == nil) {
-        
         cell = [[UITableViewCell alloc] initWithStyle:UITableViewCellStyleDefault reuseIdentifier:cellID];
     }
-    
     cell.textLabel.text = [NSString stringWithFormat:@"cell : %ld", indexPath.row];
-    
     return cell;
 }
 
@@ -68,6 +76,15 @@ typedef NS_ENUM(NSInteger, GTPullRefreshState) {
     offSet = MIN(offSet, headerHeight);
     scrollView.contentInset = UIEdgeInsetsMake(offSet, 0, 0, 0);
     
+    
+    // 测试
+    dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(3.0 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
+        
+        [UIView animateWithDuration:0.3 animations:^{
+           
+            scrollView.contentInset = UIEdgeInsetsZero;
+        }];
+    });
     
 }
 
